@@ -17,8 +17,8 @@ function draw() {
 		segments[i].draw();
 	}
 
-	context.fillStyle = "blue";
-	context.fillRect(character.x * cellWidth + cellWidth / 2, character.y * cellHeight + cellHeight / 2, cellWidth / 4, cellHeight / 4);
+	context.fillStyle = "yellow";
+	context.fillRect(character.x * cellWidth + cellWidth / 4, character.y * cellHeight + cellHeight / 4, cellWidth / 2, cellHeight / 2);
 }
 
 function keyup(keycode) {

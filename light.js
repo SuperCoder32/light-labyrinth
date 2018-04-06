@@ -193,9 +193,9 @@ function drawLight() {
 	context.fillStyle = "black";
 	context.fillRect(0, 0, canvas.width, canvas.height);
 
-	var gradient = context.createRadialGradient(lightSource.x, lightSource.y, 250, lightSource.x, lightSource.y, 0);
-	gradient.addColorStop(0, 'rgba(0, 0, 0, 0)');
-	gradient.addColorStop(1, 'rgba(255, 255, 0, 1)');
+	var gradient = context.createRadialGradient(lightSource.x, lightSource.y, 0, lightSource.x, lightSource.y, 250);
+	gradient.addColorStop(0, 'rgba(255, 255, 0, 1)');
+	gradient.addColorStop(1, 'rgba(0, 0, 0, 0)');
 	context.fillStyle = gradient;
 	context.fillRect(0, 0, canvas.width, canvas.height);
 
