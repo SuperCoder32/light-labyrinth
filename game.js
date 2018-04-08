@@ -17,8 +17,13 @@ function draw() {
 		segments[i].draw();
 	}
 
-	context.fillStyle = "yellow";
-	context.fillRect(character.x * cellWidth + cellWidth / 4, character.y * cellHeight + cellHeight / 4, cellWidth / 2, cellHeight / 2);
+	context.fillStyle = "#aaaa00";
+	context.fillRect(
+		character.x * cellWidth + (cellWidth - character.width) / 2,
+		character.y * cellHeight + (cellHeight -character.height) / 2,
+		character.width,
+		character.height
+	);
 }
 
 function keyup(keycode) {
@@ -54,7 +59,7 @@ function keydown(keycode) {
 		y: character.y + vy
 	};
 	var edgeInd = getEdgeIndex(character, nextCoords);
-	var canMove = validCoords(nextCoords) && !labEdges[edgeInd];
+	var canMove = validGridCoords(nextCoords) && !labEdges[edgeInd];
 
 	if (canMove) {
 		character.x = nextCoords.x;
@@ -67,15 +72,14 @@ function keydown(keycode) {
 	}
 }
 
+var n = 20, m = 20;
+var cellWidth = canvas.width / n, cellHeight = canvas.height / m;
 var character = {
 	x: 0,
 	y: 0,
-	width: cellWidth,
-	height: cellHeight
+	width: cellWidth / 4,
+	height: cellHeight / 4
 };
-
-var n = 20, m = 20;
-var cellWidth = canvas.width / n, cellHeight = canvas.height / m;
 var labEdges = generateLabyrinth(n, m);
 function getCells(index) {
     var x1, y1, x2, y2;
@@ -145,10 +149,38 @@ function getEdgeIndex(cell1, cell2) {
 	}
 }
 
-function validCoords(coords) {
+function validGridCoords(coords) {
 	return coords.x >= 0 && coords.x < n && coords.y >= 0 && coords.y < m; 
 }
 
+function gridCoords(coords) {
+	return {
+		x: parseInt((coords.x - 1) / cellWidth),
+		y: parseInt((coords.y - 1) / cellHeight),
+	}
+}
+
+function gridCells(coords, width, height) {
+	var upperLeft = gridCoords({
+		x: coords.x,
+		y: coords.y
+	});
+	var upperRight = gridCoords({
+		x: coords.x + width,
+		y: coords.y
+	});
+	var lowerLeft = gridCoords({
+		x: coords.x,
+		y: coords.y + height
+	});
+	var result = {};
+	if (upperLeft.x == upperRight.x - 1) {
+		return [upperLeft, upperRight];
+	}
+	if (upperLeft.y == lowerLeft.y - 1) {
+		return [upperLeft, lowerLeft];
+	}
+}
 
 var up = 38, down = 40, left = 37, right = 39;
 
