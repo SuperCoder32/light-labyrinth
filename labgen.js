@@ -38,6 +38,22 @@ function generateLabyrinth(n, m) {
 		}
 	}
 
+	//initializing result graph
+	var resGraph = [];
+	for (var y = 0; y < m; y++) {
+		resGraph[y] = [];
+		for (var x = 0; x < n; x++) {
+			resGraph[y][x] = {
+				neighbours: []
+			};
+		}
+	}
+
+	//add a cell to a graph which describes the path taken by the dfs
+	function addConnection(cell1, cell2) {
+
+	}
+
 	//given coordinates of a cell in the grid return a list of its neighbours
 	function neighboursOf(pos) {
 		var result = [];
@@ -71,10 +87,10 @@ function generateLabyrinth(n, m) {
 	//intializing grid graph
 	var visited = [];
 	var graph = [];
-	for (var y=0; y<m; y++) {
+	for (var y = 0; y < m; y++) {
 		visited[y] = [];
 		graph[y] = [];
-		for (var x=0; x<n; x++) {
+		for (var x = 0; x < n; x++) {
 			visited[y][x] = false;
 			graph[y][x] = {
 				neighbours: neighboursOf({
