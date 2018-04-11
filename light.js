@@ -189,11 +189,11 @@ function drawPolygons() {
 	}
 }
 
-function drawLight() {
+function drawLight(radius) {
 	context.fillStyle = "black";
 	context.fillRect(0, 0, canvas.width, canvas.height);
 
-	var gradient = context.createRadialGradient(lightSource.x, lightSource.y, 0, lightSource.x, lightSource.y, 250);
+	var gradient = context.createRadialGradient(lightSource.x, lightSource.y, 0, lightSource.x, lightSource.y, radius);
 	gradient.addColorStop(0, 'rgba(255, 255, 0, 1)');
 	gradient.addColorStop(1, 'rgba(0, 0, 0, 0)');
 	context.fillStyle = gradient;

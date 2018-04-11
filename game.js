@@ -34,10 +34,11 @@ function keyup(keycode) {
 
 function update() {
 	var nextCoords = new Vector(character.x + vx, character.y + vy);
-	var canMove = validCoords(nextCoords);
+	var adjustedNextCoords = new Vector(nextCoords.x - character.width / 2, nextCoords.y - character.height / 2);
+	var canMove = validCoords(adjustedNextCoords);
 
 	for (var i = 0; i < segments.length && canMove; i++) {
-		if (areColliding(nextCoords.x, nextCoords.y, character.width, character.height,
+		if (areColliding(adjustedNextCoords.x, adjustedNextCoords.y, character.width, character.height,
 		Math.min(segments[i].start.x, segments[i].end.x), Math.min(segments[i].start.y, segments[i].end.y),
 		Math.abs(segments[i].start.x - segments[i].end.x), Math.abs(segments[i].start.y - segments[i].end.y))) {
 			canMove = false;
@@ -48,8 +49,8 @@ function update() {
 		character.x = nextCoords.x;
 		character.y = nextCoords.y;
 		lightSource = {
-			x: character.x + character.width / 2,
-			y: character.y + character.height / 2
+			x: character.x,
+			y: character.y
 		};
 		updatePolygons();
 	}
@@ -61,19 +62,16 @@ function draw() {
 	context.strokeStyle = "black";
 	context.strokeRect(0, 0, canvas.width, canvas.height);
 
-	drawLight();
+	drawLight(canvas.width * 2 / n);
 	context.strokeStyle = "green";
 	for (var i=0; i<segments.length; i++) {
 		segments[i].draw();
 	}
 
 	context.fillStyle = "#aaaa00";
-	context.fillRect(
-		character.x,
-		character.y,
-		character.width,
-		character.height
-	);
+	context.beginPath();
+	context.ellipse(character.x, character.y, character.width / 2, character.height / 2, 0, 0, 2*Math.PI);
+	context.fill();
 }
 
 var n = 20, m = 20;
