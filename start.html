@@ -17,7 +17,7 @@
                 var endlessCanvas = false;
             }
             var canvas = document.getElementById("canvas-id");
-            if (endlessCanvas) {
+            if (true) {
                 canvas.width = window.innerWidth;
                 canvas.height = window.innerHeight;
                 window.onresize = function () {
@@ -26,8 +26,8 @@
                 };
             }
             else {
-                canvas.width = 1400;
-                canvas.height = 750;
+                canvas.width = 800;
+                canvas.height = 600;
             }
             var context = canvas.getContext("2d");
             context.fillStyle = "#0000ff";

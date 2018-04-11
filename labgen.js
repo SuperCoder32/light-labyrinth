@@ -14,20 +14,27 @@ function shuffle(arr) {
 }
 
 function generateLabyrinth(n, m) {
+	//intializing result edges
+	var verticalEdges = [], horizontalEdges = [];
+	for (var y = 0; y < m; y++) {
+		verticalEdges[y] = [];
+		for (var x = 0; x < n - 1; x++) {
+			verticalEdges[y][x] = true;
+		}
+	}
+	for (var y = 0; y < m - 1; y++) {
+		horizontalEdges[y] = [];
+		for (var x = 0; x < n; x++) {
+			horizontalEdges[y][x] = true;
+		}
+	}
+
 	//index of edge(wall) given the 2 cells it's between
-	function getEdgeIndex(cell1, cell2) {
-		if (cell1.y == cell2.y - 1) {
-			return cell1.y * n + cell1.x;
-		}
-		if (cell2.y == cell1.y - 1) {
-			return cell2.y * n + cell2.x;
-		}
-		var offset = (n - 1) * m;
-		if (cell1.x == cell2.x - 1) {
-			return offset + cell1.y * (n - 1) + cell1.x;
-		}
-		if (cell2.x == cell1.x - 1) {
-			return offset + cell2.y * (n - 1) + cell2.x;
+	function removeEdge(cell1, cell2) {
+		if (Math.abs(cell1.x - cell2.x) == 1) { // => same y
+			verticalEdges[cell1.y][Math.min(cell1.x, cell2.x)] = false; 
+		} else { // => same x and |y1 - y2| = 1
+			horizontalEdges[Math.min(cell1.y, cell2.y)][cell1.x] = false;
 		}
 	}
 
@@ -77,18 +84,12 @@ function generateLabyrinth(n, m) {
 		}
 	}
 
-	//initializing result edges
-	var edges = [], len = (n - 1) * m + (m - 1) * n;
-	for (var i=0; i<len; i++) {
-		edges[i] = true;
-	}
-
 	//doing dfs
 	var toVisit = [{
 		x: 0,
 		y: 0
 	}];
-	var currPos, currNeighbour;
+	var currPos, currCell, currNeighbour;
 
 	while (toVisit.length > 0) {
 		currPos = toVisit.pop();
@@ -100,12 +101,15 @@ function generateLabyrinth(n, m) {
 		visited[currPos.y][currPos.x] = true;
 
 		if (currPos.source) {
-			edges[getEdgeIndex(currPos.source, currPos)] = false;
+			removeEdge(currPos.source, currPos);
 		}
 
-		graph[currPos.y][currPos.x].neighbours = shuffle(graph[currPos.y][currPos.x].neighbours);
-		for (var i=0; i<graph[currPos.y][currPos.x].neighbours.length; i++) {
-			currNeighbour = graph[currPos.y][currPos.x].neighbours[i];
+		currCell = graph[currPos.y][currPos.x];
+		currCell.neighbours = shuffle(currCell.neighbours);
+
+		for (var i = 0; i < currCell.neighbours.length; i++) {
+			currNeighbour = currCell.neighbours[i];
+
 			if (!visited[currNeighbour.y][currNeighbour.x]) {
 				currNeighbour.source = currPos;
 				toVisit.push(currNeighbour);
@@ -113,5 +117,8 @@ function generateLabyrinth(n, m) {
 		}
 	}
 
-	return edges;
+	return {
+		vertical: verticalEdges,
+		horizontal: horizontalEdges
+	};
 }
