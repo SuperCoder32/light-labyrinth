@@ -68,31 +68,117 @@ var player = new Character(cellWidth / 2, cellHeight / 2, cellWidth / 4, cellHei
 	}
 });
 
-var enemy = new Character(cellWidth / 2, cellHeight / 4, cellWidth / 4, cellHeight / 4, "#ff0000", function () {
-	this.x += 1;
-	this.y += 1;
-});
+var enemy = new Character(0, 0, cellWidth, cellHeight, "#ff0000");
 
+enemy.move = function () {
+	var currNode = this.pathToPlayer[this.nodeIndex];
+	currNode = new Vector(currNode.x * cellWidth, currNode.y * cellHeight);
+	this.moveTowards();
+
+	var arrived = false;
+	if (this.direction == "right") {
+		arrived = this.x >= currNode.x;
+	} else if (this.direction == "left") {
+		arrived = this.x <= currNode.x;
+	} else if (this.direction == "down") {
+		arrived = this.y >= currNode.y;
+	} else if (this.direction == "up") {
+		arrived = this.y <= currNode.y;
+	}
+
+	if (arrived) {
+		this.nodeIndex++;
+		if (this.nodeIndex < this.pathToPlayer.length) {
+			this.direction = this.getDirection();
+		}
+	}
+	if (this.nodeIndex == this.pathToPlayer.length) {
+		this.initialize();
+	}
+}
+
+enemy.getDirection = function () {
+	var currNode = this.pathToPlayer[this.nodeIndex];
+	currNode = new Vector(currNode.x * cellWidth, currNode.y * cellHeight);
+	if (this.x < currNode.x) {
+		return "right";
+	} else if (this.x > currNode.x) {
+		return "left";
+	} else if (this.y < currNode.y) {
+		return "down";
+	} else if (this.y > currNode.y) {
+		return "up";
+	}
+}
+
+enemy.moveTowards = function (coords) {
+	if (this.direction == "right") {
+		this.x += this.speed;
+	} else if (this.direction == "left") {
+		this.x -= this.speed;
+	} else if (this.direction == "down") {
+		this.y += this.speed;
+	}  else if (this.direction == "up") {
+		this.y -= this.speed;
+	}
+}
+
+enemy.speed = 3;
+enemy.headStart = 5000;
+
+enemy.initialize = function () {
+	this.pathToPlayer = getGraphPath(
+		graph,
+		new Vector(parseInt(enemy.x / cellWidth), parseInt(enemy.y / cellHeight)),
+		new Vector(parseInt(player.x / cellWidth), parseInt(player.y / cellHeight))
+	);
+	//console.log(this.pathToPlayer);
+	this.nodeIndex = 0;
+	if (this.pathToPlayer) {
+		this.direction = this.getDirection();
+	}
+}
 
 
 
 //Game logic
-var chasing = false;
+var chasing = false, won = false, lost = false;
 var startTime = (new Date()).getTime();
+var countdown = null;
 
 function update() {
 	player.move();
 
-	if (!chasing && (new Date()).getTime() - startTime >= 5000) {
-		chasing = true;
+	if (!chasing) {
+		var timeDelta = (new Date()).getTime() - startTime;
+
+		if (timeDelta >= enemy.headStart) {
+			enemy.initialize();
+			chasing = true;
+		}
+
+		if (timeDelta % 1000 <= 100) {
+			countdown = enemy.headStart / 1000 - parseInt(timeDelta / 1000);
+		}
 	}
 
 	if (chasing) {
-		enemy.move();
+		if (areColliding(enemy.x, enemy.y, enemy.width, enemy.height, player.x - player.width / 2, player.y - player.height / 2, player.width, player.height)) {
+			lost = true;
+		}
+		if (parseInt(player.x / cellWidth) == n - 1 && parseInt(player.y / cellHeight) == m - 1) {
+			won = true;
+		}
+		if (enemy.pathToPlayer) {
+			enemy.move();
+		}
 	}
 }
 
 function keydown(keycode) {
+	if (won || lost) {
+		return;
+	}
 	if (keycode != up && keycode != down && keycode != left && keycode != right) {
 		return;
 	}
@@ -140,18 +226,28 @@ function draw() {
 	context.fill();
 
 	context.fillStyle = enemy.color;
-	context.beginPath();
-	context.ellipse(enemy.x, enemy.y, enemy.width / 2, enemy.height / 2, 0, 0, 2 * Math.PI);
-	context.fill();
+	context.fillRect(enemy.x, enemy.y, enemy.width, enemy.height);
+
+	context.font = "40px Arial black";
+	if (countdown) {
+		context.fillText(countdown + "s REMAINING", canvas.width / 2 - 50, canvas.height / 2 - 50);
+	}
+	if (won) {
+		context.fillText("YOU WIN", canvas.width / 2 - 50, canvas.height / 2 - 50);
+	}
+	if (lost) {
+		context.fillText("YOU LOSE", canvas.width / 2 - 50, canvas.height / 2 - 50);
+	}
 }
 
 
 
 
 //Labyrinth generation
-var edges = generateLabyrinth(n, m);
-var verEdges = edges.vertical;
-var horEdges = edges.horizontal;
+var labyrinth = generateLabyrinth(n, m);
+var verEdges = labyrinth.verticalEdges;
+var horEdges = labyrinth.horizontalEdges;
+var graph = labyrinth.graph;
 
 var segments = [];
 function pushSegment(x, y) {

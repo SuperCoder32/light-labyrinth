@@ -51,7 +51,14 @@ function generateLabyrinth(n, m) {
 
 	//add a cell to a graph which describes the path taken by the dfs
 	function addConnection(cell1, cell2) {
-
+		resGraph[cell1.y][cell1.x].neighbours.push({
+			x: cell2.x,
+			y: cell2.y
+		});
+		resGraph[cell2.y][cell2.x].neighbours.push({
+			x: cell1.x,
+			y: cell1.y
+		});
 	}
 
 	//given coordinates of a cell in the grid return a list of its neighbours
@@ -118,6 +125,7 @@ function generateLabyrinth(n, m) {
 
 		if (currPos.source) {
 			removeEdge(currPos.source, currPos);
+			addConnection(currPos.source, currPos);
 		}
 
 		currCell = graph[currPos.y][currPos.x];
@@ -134,7 +142,8 @@ function generateLabyrinth(n, m) {
 	}
 
 	return {
-		vertical: verticalEdges,
-		horizontal: horizontalEdges
+		verticalEdges: verticalEdges,
+		horizontalEdges: horizontalEdges,
+		graph: resGraph
 	};
 }
