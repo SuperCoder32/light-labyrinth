@@ -159,7 +159,7 @@ function update() {
 			won = true;
 			chasing = false;
 		}
-		if (enemy.pathToPlayer) {
+		if (!won && !lost && enemy.pathToPlayer) {
 			enemy.move();
 		}
 	}
@@ -209,7 +209,8 @@ function draw() {
 
 		context.globalAlpha = 1;
 	});
-	if ((new Date()).getTime() - startTime % 5000 <= 100) {
+	if (((new Date()).getTime() - startTime) % 5000 <= 2000) {
+		console.log("drawing");
 		context.strokeStyle = "white";
 		context.strokeRect(enemy.x, enemy.y, enemy.width, enemy.height);	
 	}
