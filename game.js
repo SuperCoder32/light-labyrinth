@@ -113,10 +113,10 @@ enemy.headStart = 5000;
 enemy.initialize = function () {
 	this.pathToPlayer = getGraphPath(
 		graph,
-		new Vector(parseInt(enemy.x / cellWidth), parseInt(enemy.y / cellHeight)),
+		new Vector(parseInt(this.x / cellWidth), parseInt(this.y / cellHeight)),
 		new Vector(parseInt(player.x / cellWidth), parseInt(player.y / cellHeight))
 	);
-	//console.log(this.pathToPlayer);
+	console.log(this.pathToPlayer);
 	this.nodeIndex = 0;
 	if (this.pathToPlayer) {
 		this.direction = this.getDirection();
@@ -133,7 +133,7 @@ var countdown = null;
 function update() {
 	player.move();
 
-	if (!chasing) {
+	if ((!chasing) && (!won) && (!lost)) {
 		var timeDelta = (new Date()).getTime() - startTime;
 		if (timeDelta >= enemy.headStart) {
 			enemy.initialize();
@@ -148,9 +148,9 @@ function update() {
 	}
 
 	if (chasing) {
-		if ((new Date()).getTime() - startTime == 5000) {
+		/*if ((new Date()).getTime() - startTime == 5000) {
 			enemy.initialize();
-		}
+		}*/
 		if (areColliding(enemy.x, enemy.y, enemy.width, enemy.height, player.x - player.width / 2, player.y - player.height / 2, player.width, player.height)) {
 			lost = true;
 			chasing = false;
@@ -159,7 +159,7 @@ function update() {
 			won = true;
 			chasing = false;
 		}
-		if (!won && !lost && enemy.pathToPlayer) {
+		if ((!won) && (!lost) && enemy.pathToPlayer) {
 			enemy.move();
 		}
 	}
@@ -209,8 +209,7 @@ function draw() {
 
 		context.globalAlpha = 1;
 	});
-	if (((new Date()).getTime() - startTime) % 5000 <= 2000) {
-		console.log("drawing");
+	if (((new Date()).getTime() - startTime) % 5000 <= 3000) {
 		context.strokeStyle = "white";
 		context.strokeRect(enemy.x, enemy.y, enemy.width, enemy.height);	
 	}
