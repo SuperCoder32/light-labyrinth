@@ -27,6 +27,9 @@ class Segment {
 		context.stroke();
 		context.closePath();
 	}
+	distance() {
+		return Math.sqrt(Math.pow(this.start.x - this.end.x, 2) + Math.pow(this.start.y - this.end.y, 2));
+	}
 }
 
 function area_determinant (p1, p2, p3) {
@@ -189,15 +192,19 @@ function drawPolygons() {
 	}
 }
 
-function drawLight(radius) {
+function drawLight(radius, r, g, b, intermediate) {
 	context.fillStyle = "black";
 	context.fillRect(0, 0, canvas.width, canvas.height);
 
 	var gradient = context.createRadialGradient(lightSource.x, lightSource.y, 0, lightSource.x, lightSource.y, radius);
-	gradient.addColorStop(0, 'rgba(255, 255, 0, 1)');
+	gradient.addColorStop(0, 'rgba(' + r + ', ' + g + ', ' + b + ', 1)');
 	gradient.addColorStop(1, 'rgba(0, 0, 0, 0)');
 	context.fillStyle = gradient;
 	context.fillRect(0, 0, canvas.width, canvas.height);
+
+	if (intermediate) {
+		intermediate();
+	}
 
 	context.fillStyle = "black";
 	context.strokeStyle = "black";

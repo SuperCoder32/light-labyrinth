@@ -14,22 +14,6 @@ class Character {
 	getUpperLeft() {
 		return new Vector(this.x - this.width / 2, this.y - this.height / 2);
 	}
-
-	isColliding(ellipse) {
-		let upperLeft1 = this.getUpperLeft();
-		let upperLeft2 = ellipse.getUpperLeft();
-
-		return areColliding(
-			upperLeft1.x,
-			upperLeft1.y,
-			this.width,
-			this.height,
-			upperLeft2.x,
-			upperLeft2.y,
-			upperLeft2.width,
-			upperLeft2.height
-		);
-	}
 }
 
 
@@ -42,12 +26,12 @@ var vx = 0, vy = 0;
 
 
 //characters logic
-var player = new Character(cellWidth / 2, cellHeight / 2, cellWidth / 4, cellHeight / 4, "#aaaa00", function () {
+var player = new Character(cellWidth / 2, cellHeight / 2, cellWidth / 4, cellHeight / 4, "#aa0000", function () {
 
 	var nextCoords = new Vector(player.x + vx, player.y + vy);
 	var adjustedNextCoords = new Vector(nextCoords.x - player.width / 2, nextCoords.y - player.height / 2);
 
-	var canMove = validCoords(adjustedNextCoords);
+	var canMove = validCoords(adjustedNextCoords, player.width / 2, player.height / 2);
 
 	for (var i = 0; i < segments.length && canMove; i++) {
 		if (areColliding(adjustedNextCoords.x, adjustedNextCoords.y, player.width, player.height,
@@ -68,7 +52,7 @@ var player = new Character(cellWidth / 2, cellHeight / 2, cellWidth / 4, cellHei
 	}
 });
 
-var enemy = new Character(0, 0, cellWidth, cellHeight, "#ff0000");
+var enemy = new Character(0, 0, cellWidth, cellHeight, "#990000");
 
 enemy.move = function () {
 	var currNode = this.pathToPlayer[this.nodeIndex];
@@ -123,7 +107,7 @@ enemy.moveTowards = function (coords) {
 	}
 }
 
-enemy.speed = 3;
+enemy.speed = 2;
 enemy.headStart = 5000;
 
 enemy.initialize = function () {
@@ -151,23 +135,29 @@ function update() {
 
 	if (!chasing) {
 		var timeDelta = (new Date()).getTime() - startTime;
-
 		if (timeDelta >= enemy.headStart) {
 			enemy.initialize();
 			chasing = true;
 		}
-
 		if (timeDelta % 1000 <= 100) {
 			countdown = enemy.headStart / 1000 - parseInt(timeDelta / 1000);
+			if (countdown <= 0) {
+				countdown = null;
+			}
 		}
 	}
 
 	if (chasing) {
+		if ((new Date()).getTime() - startTime == 5000) {
+			enemy.initialize();
+		}
 		if (areColliding(enemy.x, enemy.y, enemy.width, enemy.height, player.x - player.width / 2, player.y - player.height / 2, player.width, player.height)) {
 			lost = true;
+			chasing = false;
 		}
 		if (parseInt(player.x / cellWidth) == n - 1 && parseInt(player.y / cellHeight) == m - 1) {
 			won = true;
+			chasing = false;
 		}
 		if (enemy.pathToPlayer) {
 			enemy.move();
@@ -178,21 +168,15 @@ function update() {
 function keydown(keycode) {
 	if (won || lost) {
 		return;
-	}
-	if (keycode != up && keycode != down && keycode != left && keycode != right) {
+	} if (keycode != up && keycode != down && keycode != left && keycode != right) {
 		return;
-	}
-
-	if (keycode == up) {
+	} if (keycode == up) {
 		vy = -2;
-	}
-	if (keycode == down) {
+	} if (keycode == down) {
 		vy = 2;
-	}
-	if (keycode == left) {
+	} if (keycode == left) {
 		vx = -2;
-	}
-	if (keycode == right) {
+	} if (keycode == right) {
 		vx = 2;
 	}
 }
@@ -200,8 +184,7 @@ function keydown(keycode) {
 function keyup(keycode) {
 	if (keycode == up || keycode == down) {
 		vy = 0;
-	}
-	if (keycode == left || keycode == right) {
+	} if (keycode == left || keycode == right) {
 		vx = 0;
 	}	
 }
@@ -214,7 +197,23 @@ function draw() {
 	context.strokeStyle = "black";
 	context.strokeRect(0, 0, canvas.width, canvas.height);
 
-	drawLight(canvas.width * 2 / n);
+	var lightRadius = canvas.width * 4 / n;
+	drawLight(lightRadius, 255, 0, 0, function () {
+		context.fillStyle = enemy.color;
+		var segmentToLight = new Segment(
+			new Vector(enemy.x, enemy.y),
+			new Vector(lightSource.x, lightSource.y)
+		);
+
+		context.fillRect(enemy.x, enemy.y, enemy.width, enemy.height);
+
+		context.globalAlpha = 1;
+	});
+	if ((new Date()).getTime() - startTime % 5000 <= 100) {
+		context.strokeStyle = "white";
+		context.strokeRect(enemy.x, enemy.y, enemy.width, enemy.height);	
+	}
+
 	context.strokeStyle = "green";
 	for (var i=0; i<segments.length; i++) {
 		segments[i].draw();
@@ -225,17 +224,17 @@ function draw() {
 	context.ellipse(player.x, player.y, player.width / 2, player.height / 2, 0, 0, 2 * Math.PI);
 	context.fill();
 
-	context.fillStyle = enemy.color;
-	context.fillRect(enemy.x, enemy.y, enemy.width, enemy.height);
-
 	context.font = "40px Arial black";
 	if (countdown) {
+		context.fillStyle = "orange";
 		context.fillText(countdown + "s REMAINING", canvas.width / 2 - 50, canvas.height / 2 - 50);
 	}
 	if (won) {
+		context.fillStyle = "green";
 		context.fillText("YOU WIN", canvas.width / 2 - 50, canvas.height / 2 - 50);
 	}
 	if (lost) {
+		context.fillStyle = "red";
 		context.fillText("YOU LOSE", canvas.width / 2 - 50, canvas.height / 2 - 50);
 	}
 }
@@ -251,13 +250,15 @@ var graph = labyrinth.graph;
 
 var segments = [];
 function pushSegment(x, y) {
-	segments.push(new Segment({
-		x: start.x * cellWidth,
-		y: start.y * cellHeight
-	}, {
-		x: end.x * cellWidth,
-		y: end.y * cellHeight
-	}));
+	segments.push(new Segment(
+		new Vector(
+			start.x * cellWidth,
+			start.y * cellHeight
+		),
+		new Vector (
+			end.x * cellWidth,
+			end.y * cellHeight
+	)));
 }
 
 for (var y = 0; y < verEdges.length; y++) {
@@ -284,15 +285,15 @@ for (var y = 0; y < horEdges.length; y++) {
 
 
 //Helper functions and constants + initialization
-function validCoords(coords) {
-	return coords.x >= 0 && coords.x < canvas.width && coords.y >= 0 && coords.y < canvas.height; 
+function validCoords(coords, width, height) {
+	return coords.x >= 0 && coords.x + width < canvas.width && coords.y >= 0 && coords.y + height < canvas.height; 
 }
 
 var up = 38, down = 40, left = 37, right = 39;
 
-lightSource = {
-	x: player.x + player.width / 2,
-	y: player.y + player.height / 2
-};
+lightSource = new Vector(
+	player.x + player.width / 2,
+	player.y + player.height / 2
+);
 
 updatePolygons();
