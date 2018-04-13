@@ -225,14 +225,16 @@ function draw() {
 	context.strokeRect(0, 0, canvas.width, canvas.height);
 
 	var lightRadius = canvas.width * 4 / n;
-	drawLight(lightRadius, 255, 0, 0, function () {
-		context.fillStyle = enemy.color;
+	drawLight(lightRadius, 255, 0, 0, function (gradient) {
+		context.fillStyle = gradient;
 		var segmentToLight = new Segment(
 			new Vector(enemy.x, enemy.y),
 			new Vector(lightSource.x, lightSource.y)
 		);
 
-		context.fillRect(enemy.x, enemy.y, enemy.width, enemy.height);
+		if (segmentToLight.distance() <= lightRadius) {
+			context.fillRect(enemy.x, enemy.y, enemy.width, enemy.height);
+		}
 
 		context.globalAlpha = 1;
 	});

@@ -210,7 +210,7 @@ function drawLight(radius, r, g, b, intermediate) {
 	context.fillRect(0, 0, canvas.width, canvas.height);
 
 	if (intermediate) {
-		intermediate();
+		intermediate(gradient);
 	}
 
 	context.fillStyle = "black";
