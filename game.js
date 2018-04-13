@@ -198,7 +198,7 @@ function draw() {
 	context.strokeRect(0, 0, canvas.width, canvas.height);
 
 	var lightRadius = canvas.width * 4 / n;
-	drawLight(lightRadius, 255, 0, 0, function () {
+	drawLight(lightRadius, 300, 0, 0, function () {
 		context.fillStyle = enemy.color;
 		var segmentToLight = new Segment(
 			new Vector(enemy.x, enemy.y),
@@ -209,7 +209,7 @@ function draw() {
 
 		context.globalAlpha = 1;
 	});
-	if (((new Date()).getTime() - startTime) % 5000 <= 3000) {
+	if (((new Date()).getTime() - startTime) % 5000 <= 2000) {
 		context.strokeStyle = "white";
 		context.strokeRect(enemy.x, enemy.y, enemy.width, enemy.height);	
 	}
@@ -227,16 +227,22 @@ function draw() {
 	context.font = "40px Arial black";
 	if (countdown) {
 		context.fillStyle = "orange";
-		context.fillText(countdown + "s REMAINING", canvas.width / 2 - 50, canvas.height / 2 - 50);
+		context.fillText(countdown + "s REMAINING", canvas.width / 2 - 150, canvas.height / 2 - 50);
 	}
 	if (won) {
 		context.fillStyle = "green";
-		context.fillText("YOU WIN", canvas.width / 2 - 50, canvas.height / 2 - 50);
+		context.fillText("YOU WIN", canvas.width / 2 - 125, canvas.height / 2 - 50);
 	}
 	if (lost) {
 		context.fillStyle = "red";
-		context.fillText("YOU LOSE", canvas.width / 2 - 50, canvas.height / 2 - 50);
+		context.fillText("YOU LOSE", canvas.width / 2 - 125, canvas.height / 2 - 50);
 	}
+
+	context.fillStyle = "rgba(0, 255, 0, 0.5)";
+	context.fillRect((n - 1) * cellWidth, (m - 1) * cellHeight, cellWidth, cellHeight);
+	context.font = "8px Arial black";
+	context.fillStyle = "white";
+	context.fillText("FINISH", (n - 1) * cellWidth + 5, (m - 1) * cellHeight + cellHeight / 3);
 }
 
 
