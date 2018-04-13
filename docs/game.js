@@ -191,23 +191,32 @@ function keyup(keycode) {
 }
 
 if (isMobile) {
-	function mousemove() {
-		if (mouseX > player.x) {
-			vx = 2;
+	function mousedown() {
+		var dir = new Vector(mouseX - player.x, mouseY - player.y);
+		var newVx = 0, newVy = 0;
+		if (dir.x != 0) {
+			if (dir.x > 0) {
+				newVx = 2;
+			} else if (dir.x < 0) {
+				newVx = -2;
+			}
+			newVy = newVx * dir.y / dir.x;
+		} else if (dir.y != 0) {
+			if (dir.y > 0) {
+				newVy = 2;
+			} else if (dir.y < 0) {
+				newVy = -2;
+			}
+			newVx = newVy * dir.x / dir.y;
 		}
-		if (mouseY > player.y) {
-			vy = 2;
-		}
-		if (mouseX < player.x) {
-			vx = -2;
-		}
-		if (mouseY < player.y) {
-			vy = -2;
-		}
+		vx = newVx;
+		vy = newVy;
+	}
+	function mouseup() {
+		vx = 0;
+		vy = 0;
 	}
 }
-
-
 
 
 //Drawing
