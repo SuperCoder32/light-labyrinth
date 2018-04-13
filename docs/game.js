@@ -190,6 +190,23 @@ function keyup(keycode) {
 	}	
 }
 
+if (isMobile) {
+	function mousemove() {
+		if (mouseX > player.x) {
+			vx = 2;
+		}
+		if (mouseY > player.y) {
+			vy = 2;
+		}
+		if (mouseX < player.x) {
+			vx = -2;
+		}
+		if (mouseY < player.y) {
+			vy = -2;
+		}
+	}
+}
+
 
 
 
