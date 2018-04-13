@@ -219,14 +219,19 @@ if (isMobile) {
 }
 
 
+
+
+var lightRadius = canvas.width * 4 / n;
+var lightGradient;
+
 //Drawing
 function draw() {
 	context.strokeStyle = "black";
 	context.strokeRect(0, 0, canvas.width, canvas.height);
 
-	var lightRadius = canvas.width * 4 / n;
-	drawLight(lightRadius, 255, 0, 0, function (gradient) {
-		context.fillStyle = gradient;
+	lightGradient = createRadialGradient(255, 0, 0, lightRadius);
+	drawLight(lightGradient, function () {
+		context.fillStyle = lightGradient;
 		var segmentToLight = new Segment(
 			new Vector(enemy.x, enemy.y),
 			new Vector(lightSource.x, lightSource.y)

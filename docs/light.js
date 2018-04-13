@@ -199,18 +199,23 @@ function drawPolygons() {
 	}
 }
 
-function drawLight(radius, r, g, b, intermediate) {
+function createRadialGradient(r, g, b, radius) {
+	var res = context.createRadialGradient(lightSource.x, lightSource.y, 0, lightSource.x, lightSource.y, radius);
+	res.addColorStop(0, 'rgba(' + r + ', ' + g + ', ' + b + ', 1)');
+	res.addColorStop(1, 'rgba(0, 0, 0, 0)');
+	return res;
+}
+
+function drawLight(gradient, intermediate) {
 	context.fillStyle = "black";
 	context.fillRect(0, 0, canvas.width, canvas.height);
 
-	var gradient = context.createRadialGradient(lightSource.x, lightSource.y, 0, lightSource.x, lightSource.y, radius);
-	gradient.addColorStop(0, 'rgba(' + r + ', ' + g + ', ' + b + ', 1)');
-	gradient.addColorStop(1, 'rgba(0, 0, 0, 0)');
+	
 	context.fillStyle = gradient;
 	context.fillRect(0, 0, canvas.width, canvas.height);
 
 	if (intermediate) {
-		intermediate(gradient);
+		intermediate();
 	}
 
 	context.fillStyle = "black";
