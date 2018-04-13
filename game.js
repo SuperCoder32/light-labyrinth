@@ -48,7 +48,9 @@ var player = new Character(cellWidth / 2, cellHeight / 2, cellWidth / 4, cellHei
 			x: player.x,
 			y: player.y
 		};
-		updatePolygons();
+
+		var lightRadius = canvas.width * 4 / n;
+		updatePolygons(lightRadius);
 	}
 });
 
@@ -116,7 +118,6 @@ enemy.initialize = function () {
 		new Vector(parseInt(this.x / cellWidth), parseInt(this.y / cellHeight)),
 		new Vector(parseInt(player.x / cellWidth), parseInt(player.y / cellHeight))
 	);
-	console.log(this.pathToPlayer);
 	this.nodeIndex = 0;
 	if (this.pathToPlayer) {
 		this.direction = this.getDirection();
@@ -198,7 +199,7 @@ function draw() {
 	context.strokeRect(0, 0, canvas.width, canvas.height);
 
 	var lightRadius = canvas.width * 4 / n;
-	drawLight(lightRadius, 300, 0, 0, function () {
+	drawLight(lightRadius, 255, 0, 0, function () {
 		context.fillStyle = enemy.color;
 		var segmentToLight = new Segment(
 			new Vector(enemy.x, enemy.y),

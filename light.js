@@ -104,11 +104,17 @@ function canvasIntersectionPoint(seg) {
 	}	
 }
 
-function updatePolygons() {
+function updatePolygons(maxDist) {
 	polygons = [];
 
 	for (var i=0; i<segments.length; i++) {
 		var start = segments[i].start, end = segments[i].end;
+		var ray1 = new Segment(start, lightSource);
+		var ray2 = new Segment(end, lightSource)
+		if (!(ray1.distance() <= maxDist || ray2.distance() <= maxDist)) {
+			continue;
+		}
+
 		if (clockwise(lightSource, start, end)) {
 			start = segments[i].end;
 			end = segments[i].start;
@@ -121,10 +127,10 @@ function updatePolygons() {
 		if ((intersection1.x === intersection2.x && (intersection1.x === 0 || intersection1.x === canvas.width))
 		 || (intersection1.y === intersection2.y && (intersection1.y === 0 || intersection1.y === canvas.height))) {
 
-			polygons[i].push(intersection1);
-			polygons[i].push(start);
-			polygons[i].push(end);
-			polygons[i].push(intersection2);
+			polygons[polygons.length - 1].push(intersection1);
+			polygons[polygons.length - 1].push(start);
+			polygons[polygons.length - 1].push(end);
+			polygons[polygons.length - 1].push(intersection2);
 
 		} else {
 			var additionals = [];
@@ -166,13 +172,13 @@ function updatePolygons() {
 				additionals.push(new Vector(canvas.width, 0));
 			}
 
-			polygons[i].push(intersection1);
+			polygons[polygons.length - 1].push(intersection1);
 			for (var j=0; j<additionals.length; j++) {
-				polygons[i].push(additionals[j]);
+				polygons[polygons.length - 1].push(additionals[j]);
 			}
-			polygons[i].push(intersection2);
-			polygons[i].push(end);
-			polygons[i].push(start);
+			polygons[polygons.length - 1].push(intersection2);
+			polygons[polygons.length - 1].push(end);
+			polygons[polygons.length - 1].push(start);
 		}
 	}
 }
@@ -186,6 +192,7 @@ function drawPolygons() {
 				context.lineTo(polygons[i][j].x, polygons[i][j].y);
 			}
 			context.closePath();
+			//context.strokeStyle = "white";
 			context.stroke();
 			context.fill();
 		}
