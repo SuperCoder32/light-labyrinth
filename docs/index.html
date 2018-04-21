@@ -12,7 +12,7 @@
     <link rel="stylesheet" type="text/css" href="styles.css">
 </head>
     <body  onload="init()">
-	   <canvas id="canvas-id" width="800" height="600">
+	   <canvas id="canvas-id" width="800" height="700">
             <script>
             var timer;
             if (endlessCanvas == undefined) {
@@ -171,6 +171,7 @@
                 //Auxillary game logic
                 initGameWrapper();
                 redraw();
+
                 document.getElementById("startbtn").addEventListener("click", function () {
                     if (!started) {
                         startTime = (new Date()).getTime();
@@ -178,8 +179,9 @@
                         callupdate();
                     }
                 });
+                document.getElementById("genbtn").addEventListener("click", initGameWrapper);
             };
-            var startTime, started, n, m, cyclesProb, coinProb, headStart, lightSpan;
+            var startTime, started, n, m, cyclesProb, coinProb, headStart, lightSpan, enemySpeed, playerSpeed;
             
             function extractValFromEl(id) {
                 return parseInt(document.querySelector("#"+id+">input").value);
@@ -192,6 +194,8 @@
                 coinProb = extractValFromEl("coinProb");
                 headStart = extractValFromEl("headStart");
                 lightSpan = extractValFromEl("lightSpan");
+                enemySpeed = extractValFromEl("enemySpeed") / 100;
+                playerSpeed = extractValFromEl("playerSpeed") / 100;
                 initGame();
             }
 
@@ -231,6 +235,15 @@
             Span of light(in number of cells):
             <input type="number" value=5 />
         </label>
+        <label id="enemySpeed">
+            Speed of enemy in percentage of cell width or height per 10 milliseconds:
+            <input type="number" value="4" />
+        </label>
+        <label id="playerSpeed">
+            Speed of player in percentage of cell width per 10 milliseconds:
+            <input type="number" value="6" />
+        </label>
         <button id="startbtn">Start</button>
+        <button id="genbtn">Generate</button>
     </body>
 </html>

@@ -1,9 +1,22 @@
 'use strict'
 
+function lerp(a, b, f){
+	return a.add((b.substract(a).multiply(f)));
+}
+
 class Vector {
 	constructor(x, y) {
 		this.x = x;
 		this.y = y;
+	}
+	add(vec2){
+		return new Vector(this.x + vec2.x, this.y + vec2.y);
+	}
+	substract(vec2){
+		return new Vector(this.x - vec2.x, this.y - vec2.y);
+	}
+	multiply(t){
+		return new Vector(this.x * t, this.y * t);
 	}
 	getCopy() {
 		return new Vector(this.x, this.y);
@@ -15,11 +28,6 @@ class Segment {
 		this.start = start;
 		this.end = end;
 	}
-	side(vector) {
-		var x = vector.x;
-		var y = vector.y;
-		return (x - this.start.x) * (this.end.y - this.start.y) - (y - this.start.y) * (this.end.x - this.start.x); 
-	}
 	draw() {
 		context.beginPath();
 		context.moveTo(this.start.x, this.start.y);
@@ -30,6 +38,7 @@ class Segment {
 	distance() {
 		return Math.sqrt(Math.pow(this.start.x - this.end.x, 2) + Math.pow(this.start.y - this.end.y, 2));
 	}
+	
 }
 
 function area_determinant (p1, p2, p3) {

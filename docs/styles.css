@@ -5,7 +5,18 @@
     box-shadow: gray;
     cursor: pointer;
     position: fixed;
-    top: 250px;
+    top: 350px;
+    font-size: 2em;
+    font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
+}
+#genbtn {
+    color: black;
+    background-color: orange;
+    border: none;
+    box-shadow: gray;
+    cursor: pointer;
+    position: fixed;
+    top: 400px;
     font-size: 2em;
     font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
 }   
@@ -26,4 +37,10 @@ label#headStart {
 }
 label#lightSpan {
     top: 200px;
+}
+label#enemySpeed {
+    top: 250px;
+}
+label#playerSpeed {
+    top: 300px;
 }

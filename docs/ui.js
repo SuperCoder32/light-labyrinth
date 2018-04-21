@@ -1,16 +1,18 @@
+var up = 38, down = 40, left = 37, right = 39;
+
 function keydown(keycode) {
 	if (won || lost) {
 		return;
 	} if (keycode != up && keycode != down && keycode != left && keycode != right) {
 		return;
 	} if (keycode == up) {
-		vy = -3;
+		vy = -player.speed;
 	} if (keycode == down) {
-		vy = 3;
+		vy = player.speed;
 	} if (keycode == left) {
-		vx = -3;
+		vx = -player.speed;
 	} if (keycode == right) {
-		vx = 3;
+		vx = player.speed;
 	}
 }
 
