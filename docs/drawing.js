@@ -6,21 +6,18 @@ function drawBackground() {
 }
 
 function drawEnemy() {
-	context.fillStyle = "rgba(172, 0, 0, 0.7)";
+	context.fillStyle = "rgba(172, 0, 0, 0.5)";
 	var segmentToLight = new Segment(
 		new Vector(enemy.x + enemy.width / 2, enemy.y + enemy.height / 2),
 		new Vector(lightSource.x, lightSource.y)
 	);
 
-	if (segmentToLight.distance() <= lightRadius) {
-		context.fillRect(enemy.x, enemy.y, enemy.width, enemy.height);
-	}
-
-	context.globalAlpha = 1;
+	context.fillRect(enemy.x, enemy.y, enemy.width, enemy.height);
 }
 
 var hlStartTime = null;
 function highlightEnemy() {
+	/*
 	if (enemy.pathToPlayer) {
 		if (enemy.nodeIndex == enemy.pathToPlayer.length - 1) {
 			hlStartTime = (new Date()).getTime();
@@ -29,7 +26,7 @@ function highlightEnemy() {
 	if ((new Date()).getTime() - hlStartTime <= 500) {
 		context.strokeStyle = "red";
 		context.strokeRect(enemy.x, enemy.y, enemy.width, enemy.height);	
-	}
+	}*/
 }
 
 function drawLabyrinth() {
