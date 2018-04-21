@@ -117,7 +117,7 @@ function generateLabyrinth(n, m) {
 	while (toVisit.length > 0) {
 		currPos = toVisit.pop();
 
-		if (visited[currPos.y][currPos.x]) {
+		if (visited[currPos.y][currPos.x] && (Math.random() * 4 > 1)) {
 			continue;
 		}
 

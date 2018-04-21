@@ -1,23 +1,4 @@
 function getGraphPath(graph, start, dest) {
-	//initializing bfs tree
-	var bfsTree = [];
-	for (var y = 0; y < m; y++) {
-		bfsTree[y] = [];
-		for (var x = 0; x < n; x++) {
-			bfsTree[y][x] = {
-				neighbours: []
-			};
-		}
-	}
-
-	//add a cell to a graph which describes the shortest path taken by the bfs
-	function addOneWayConnection(grid, cell1, cell2) {
-		grid[cell1.y][cell1.x].neighbours.push({
-			x: cell2.x,
-			y: cell2.y
-		});
-	}
-
 	//intializing visited
 	var visited = [];
 	for (var y = 0; y < m; y++) {
@@ -38,11 +19,9 @@ function getGraphPath(graph, start, dest) {
 		if (visited[currPos.y][currPos.x]) {
 			continue;
 		}
+
 		visited[currPos.y][currPos.x] = true;
 
-		if (currPos.source) {
-			addOneWayConnection(bfsTree, currPos, currPos.source);
-		}
 
 		if (currPos.x == dest.x && currPos.y == dest.y) {
 			found = true;
