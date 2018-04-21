@@ -1,0 +1,29 @@
+#startbtn {
+    color: black;
+    background-color: orange;
+    border: none;
+    box-shadow: gray;
+    cursor: pointer;
+    position: fixed;
+    top: 250px;
+    font-size: 2em;
+    font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
+}   
+label {
+    position: fixed;
+}
+label#size {
+    top: 0;
+}
+label#cyclesProb {
+    top: 50px;
+}
+label#coinProb {
+    top: 100px;
+}
+label#headStart {
+    top: 150px;
+}
+label#lightSpan {
+    top: 200px;
+}

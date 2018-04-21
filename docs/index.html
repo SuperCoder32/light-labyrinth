@@ -9,10 +9,12 @@
             overflow: hidden;
         }
     </style>
+    <link rel="stylesheet" type="text/css" href="styles.css">
 </head>
     <body  onload="init()">
 	   <canvas id="canvas-id" width="800" height="600">
             <script>
+            var timer;
             if (endlessCanvas == undefined) {
                 var endlessCanvas = false;
             }
@@ -77,7 +79,7 @@
 
             function callupdate() {
                 update(); // call programmer's update() function
-                setTimeout(callupdate, 10); // and 10 ms after that ...
+                timer = setTimeout(callupdate, 10); // and 10 ms after that ...
             };
 
             function areColliding(Ax, Ay, Awidth, Aheight, Bx, By, Bwidth, Bheight) {
@@ -158,9 +160,47 @@
                         context.fillText("Press <F12> for error info!", 40, 40);
                     };
                 }
+
+                var inputs = document.getElementsByTagName("input");
+                for (var i = 0; i < inputs.length; i++) {
+                    inputs[i].addEventListener("change", function () {
+                        regen();
+                    });
+                }
+
+                //Auxillary game logic
+                initGameWrapper();
                 redraw();
-                callupdate();
+                document.getElementById("startbtn").addEventListener("click", function () {
+                    if (!started) {
+                        startTime = (new Date()).getTime();
+                        started = true;
+                        callupdate();
+                    }
+                });
             };
+            var startTime, started, n, m, cyclesProb, coinProb, headStart, lightSpan;
+            
+            function extractValFromEl(id) {
+                return parseInt(document.querySelector("#"+id+">input").value);
+            }
+
+            function initGameWrapper() {
+                var size = extractValFromEl("size");
+                n = size, m = size;
+                cyclesProb = extractValFromEl("cyclesProb");
+                coinProb = extractValFromEl("coinProb");
+                headStart = extractValFromEl("headStart");
+                lightSpan = extractValFromEl("lightSpan");
+                initGame();
+            }
+
+            function regen() {
+                clearTimeout(timer);
+                initGameWrapper();
+            }
+
+
             //version ~9- edited by roshav. Should be fine with all touchscreendevices. Uploaded to iashu.free.bg/code.zip on 24.12.2016
             </script>
             <script src="light.js"></script>
@@ -171,5 +211,26 @@
             <script src="drawing.js"></script>
             <!--<script src="pastebin.js"></script>-->
         </canvas>
+        <label id="size">
+            Number of rows and cols for labyrinth:
+            <input type="number" value=20 />
+        </label>
+        <label id="cyclesProb">
+            Probability for cycles in labyrinth:
+            <input type="number" value=50 />
+        </label>
+        <label id="coinProb">
+            Probability for coin spawning on map:
+            <input type="number" value=10 />
+        </label>
+        <label id="headStart">
+            Head start before enemy starts chasing:
+            <input type="number" value=5 />
+        </label>
+        <label id="lightSpan">
+            Span of light(in number of cells):
+            <input type="number" value=5 />
+        </label>
+        <button id="startbtn">Start</button>
     </body>
 </html>

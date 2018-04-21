@@ -1,4 +1,3 @@
-var lightRadius = canvas.width * 5 / n;
 var lightGradient;
 
 function drawBackground() {
@@ -20,8 +19,14 @@ function drawEnemy() {
 	context.globalAlpha = 1;
 }
 
+var hlStartTime = null;
 function highlightEnemy() {
-	if (((new Date()).getTime() - startTime) % 5000 <= 2000) {
+	if (enemy.pathToPlayer) {
+		if (enemy.nodeIndex == enemy.pathToPlayer.length - 1) {
+			hlStartTime = (new Date()).getTime();
+		}
+	}
+	if ((new Date()).getTime() - hlStartTime <= 500) {
 		context.strokeStyle = "red";
 		context.strokeRect(enemy.x, enemy.y, enemy.width, enemy.height);	
 	}
@@ -55,12 +60,16 @@ function drawPlayer() {
 }
 
 var instr = "Navigate with the arrow keys and collect all the coins and go to the finish.";
+function displayInstr() {
+	context.font = "18px Arial black";
+	context.fillStyle = "white";
+	context.fillText(instr, 50, canvas.height / 2 - 150);
+}
+
 function drawHUD() {
 	context.font = "40px Arial black";
 	if (countdown) {
-		context.font = "18px Arial black";
-		context.fillStyle = "white";
-		context.fillText(instr, 50, canvas.height / 2 - 150);
+		displayInstr();
 		context.font = "40px Arial black";
 		context.fillStyle = "orange";
 		context.fillText(countdown + "s REMAINING", canvas.width / 2 - 150, canvas.height / 2 - 50);
@@ -70,9 +79,11 @@ function drawHUD() {
 	} else if (lost) {
 		context.fillStyle = "red";
 		context.fillText("YOU LOSE", canvas.width / 2 - 125, canvas.height / 2 - 50);
-	} else {
+	} else if (started) {
 		context.fillStyle = "rgba(0, 0, 255, 0.7)";
 		context.fillText(points, canvas.width / 2 - 25, canvas.height / 2 - 25);
+	} else {
+		displayInstr();
 	}
 
 	context.fillStyle = "rgba(0, 255, 0, 0.5)";

@@ -14,68 +14,10 @@ class Character {
 
 
 
-
-//Game variables
-var n = 20, m = 20;
-var cellWidth = canvas.width / n, cellHeight = canvas.height / m;
-var labyrinth = generateLabyrinth(n, m);
-var verEdges = labyrinth.verticalEdges;
-var horEdges = labyrinth.horizontalEdges;
-var graph = labyrinth.graph;
-
-var segments = [];
-function pushSegment(x, y) {
-	segments.push(new Segment(
-		new Vector(
-			start.x * cellWidth,
-			start.y * cellHeight
-		),
-		new Vector (
-			end.x * cellWidth,
-			end.y * cellHeight
-	)));
-}
-
-for (var y = 0; y < verEdges.length; y++) {
-	for (var x = 0; x < verEdges[y].length; x++) {
-		if (verEdges[y][x]) {
-			var start = new Vector(x + 1, y);
-			var end = new Vector(x + 1, y + 1); 
-			pushSegment(start, end);
-		}
-	}
-}
-
-for (var y = 0; y < horEdges.length; y++) {
-	for (var x = 0; x < horEdges[y].length; x++) {
-		if (horEdges[y][x]) {
-			var start = new Vector(x, y + 1);
-			var end = new Vector(x + 1, y + 1); 
-			pushSegment(start, end);
-		}
-	}
-}
-
-
-var vx = 0, vy = 0;
-
-var pointsRequired = 0;
-var pointTaken = [];
-for (var y = 0; y < m; y++) {
-	pointTaken[y] = [];
-	for (var x = 0; x < n; x++) {
-		pointTaken[y][x] = Math.random() * 100 >= 10;
-		if (!pointTaken[y][x]) pointsRequired++;
-	}
-}
-var points = 0;
-
-
-
-
-//characters logic
-var player = new Character(cellWidth / 2, cellHeight / 2, cellWidth / 4, cellHeight / 4, "#aaaaaa", function () {
-
+//Game initialization
+//	Player logic
+var player;
+function playerMovementFunc() {
 	var nextCoords = new Vector(player.x + vx, player.y + vy);
 	var adjustedNextCoords = new Vector(nextCoords.x - player.width / 2, nextCoords.y - player.height / 2);
 
@@ -106,102 +48,178 @@ var player = new Character(cellWidth / 2, cellHeight / 2, cellWidth / 4, cellHei
 
 		updatePolygons(lightRadius);
 	}
-});
+}
 
-
-
-
-var enemy = new Character(0, 0, cellWidth, cellHeight, "#990000");
-
-enemy.move = function () {
-	var currNode = this.pathToPlayer[this.nodeIndex];
-	currNode = new Vector(currNode.x * cellWidth, currNode.y * cellHeight);
-	this.moveTowards();
-
-	var arrived = false;
-	if (this.direction == "right") {
-		arrived = this.x >= currNode.x;
-	} else if (this.direction == "left") {
-		arrived = this.x <= currNode.x;
-	} else if (this.direction == "down") {
-		arrived = this.y >= currNode.y;
-	} else if (this.direction == "up") {
-		arrived = this.y <= currNode.y;
+//	Enemy logic
+var enemy;
+function createEnemy(headStart) {
+	enemy.move = function () {
+		var currNode = this.pathToPlayer[this.nodeIndex];
+		currNode = new Vector(currNode.x * cellWidth, currNode.y * cellHeight);
+		this.moveTowards();
+	
+		var arrived = false;
+		if (this.direction == "right") {
+			arrived = this.x >= currNode.x;
+		} else if (this.direction == "left") {
+			arrived = this.x <= currNode.x;
+		} else if (this.direction == "down") {
+			arrived = this.y >= currNode.y;
+		} else if (this.direction == "up") {
+			arrived = this.y <= currNode.y;
+		}
+	
+		if (arrived) {
+			this.nodeIndex++;
+			if (this.nodeIndex < this.pathToPlayer.length) {
+				this.direction = this.getDirection();
+			}
+		}
+		if (this.nodeIndex == this.pathToPlayer.length) {
+			this.initialize();
+		}
 	}
-
-	if (arrived) {
-		this.nodeIndex++;
-		if (this.nodeIndex < this.pathToPlayer.length) {
+	
+	enemy.getDirection = function () {
+		var currNode = this.pathToPlayer[this.nodeIndex];
+		currNode = new Vector(currNode.x * cellWidth, currNode.y * cellHeight);
+		if (this.x < currNode.x) {
+			return "right";
+		} else if (this.x > currNode.x) {
+			return "left";
+		} else if (this.y < currNode.y) {
+			return "down";
+		} else if (this.y > currNode.y) {
+			return "up";
+		}
+	}
+	
+	enemy.moveTowards = function (coords) {
+		if (this.direction == "right") {
+			this.x += this.speed;
+		} else if (this.direction == "left") {
+			this.x -= this.speed;
+		} else if (this.direction == "down") {
+			this.y += this.speed;
+		}  else if (this.direction == "up") {
+			this.y -= this.speed;
+		}
+	}
+	
+	enemy.initialize = function () {
+		var myGridPos = gridCoords(this);
+		var playerGridPos = gridCoords(player); 
+		this.pathToPlayer = getGraphPath(
+			graph,
+			new Vector(myGridPos.x, myGridPos.y),
+			new Vector(playerGridPos.x, playerGridPos.y)
+		);
+		this.nodeIndex = 0;
+		if (this.pathToPlayer) {
 			this.direction = this.getDirection();
 		}
 	}
-	if (this.nodeIndex == this.pathToPlayer.length) {
-		this.initialize();
-	}
+	
+	enemy.speed = 2;
+	enemy.headStart = headStart;
 }
 
-enemy.getDirection = function () {
-	var currNode = this.pathToPlayer[this.nodeIndex];
-	currNode = new Vector(currNode.x * cellWidth, currNode.y * cellHeight);
-	if (this.x < currNode.x) {
-		return "right";
-	} else if (this.x > currNode.x) {
-		return "left";
-	} else if (this.y < currNode.y) {
-		return "down";
-	} else if (this.y > currNode.y) {
-		return "up";
-	}
+//	Basics
+var cellWidth, cellHeight, labyrinth, verEdges, horEdges, graph;
+var pointsRequired, pointTaken, points;
+var lightRadius;
+var segments;
+function pushSegment(start, end) {
+	segments.push(new Segment(
+		new Vector(
+			start.x * cellWidth,
+			start.y * cellHeight
+		),
+		new Vector (
+			end.x * cellWidth,
+			end.y * cellHeight
+	)));
 }
 
-enemy.moveTowards = function (coords) {
-	if (this.direction == "right") {
-		this.x += this.speed;
-	} else if (this.direction == "left") {
-		this.x -= this.speed;
-	} else if (this.direction == "down") {
-		this.y += this.speed;
-	}  else if (this.direction == "up") {
-		this.y -= this.speed;
-	}
-}
+var vx, vy; 
+var chasing, won, lost;
+var countdown;
 
-enemy.initialize = function () {
-	var myGridPos = gridCoords(this);
-	var playerGridPos = gridCoords(player); 
-	this.pathToPlayer = getGraphPath(
-		graph,
-		new Vector(myGridPos.x, myGridPos.y),
-		new Vector(playerGridPos.x, playerGridPos.y)
+function initGame() {
+	started = false;
+	vx = 0, vy = 0; 
+	chasing = false, won = false, lost = false;
+	countdown = null;
+
+	cellWidth = canvas.width / n, cellHeight = canvas.height / m;
+	labyrinth = generateLabyrinth(n, m);
+	verEdges = labyrinth.verticalEdges;
+	horEdges = labyrinth.horizontalEdges;
+	graph = labyrinth.graph;
+
+	segments = [];
+	for (var y = 0; y < verEdges.length; y++) {
+		for (var x = 0; x < verEdges[y].length; x++) {
+			if (verEdges[y][x]) {
+				var start = new Vector(x + 1, y);
+				var end = new Vector(x + 1, y + 1); 
+				pushSegment(start, end);
+			}
+		}
+	}
+
+	for (var y = 0; y < horEdges.length; y++) {
+		for (var x = 0; x < horEdges[y].length; x++) {
+			if (horEdges[y][x]) {
+				var start = new Vector(x, y + 1);
+				var end = new Vector(x + 1, y + 1); 
+				pushSegment(start, end);
+			}
+		}
+	}
+
+	pointsRequired = 0;
+	pointTaken = [];
+	for (var y = 0; y < m; y++) {
+		pointTaken[y] = [];
+		for (var x = 0; x < n; x++) {
+			pointTaken[y][x] = Math.random() * 100 >= coinProb;
+			if (!pointTaken[y][x]) pointsRequired++;
+		}
+	}
+	points = 0;
+
+	player = new Character(cellWidth / 2, cellHeight / 2, cellWidth / 4, cellHeight / 4, "#aaaaaa", playerMovementFunc);
+	enemy = new Character(0, 0, cellWidth, cellHeight, "#990000");
+	createEnemy(headStart);
+
+	lightSource = new Vector(
+		player.x + player.width / 2,
+		player.y + player.height / 2
 	);
-	this.nodeIndex = 0;
-	if (this.pathToPlayer) {
-		this.direction = this.getDirection();
-	}
+
+	lightRadius = canvas.width * lightSpan / n;
+	updatePolygons(lightRadius);
 }
 
-enemy.speed = 2;
-enemy.headStart = 5000;
+
+
 
 
 
 //Game logic
-var chasing = false, won = false, lost = false;
-var startTime = (new Date()).getTime();
-var countdown = null;
-
 function update() {
 	player.move();
 
 	//Countdown
 	if ((!chasing) && (!won) && (!lost)) {
 		var timeDelta = (new Date()).getTime() - startTime;
-		if (timeDelta >= enemy.headStart) {
+		if (timeDelta >= enemy.headStart * 1000) {
 			enemy.initialize();
 			chasing = true;
 		}
-		if (timeDelta % 1000 <= 100) {
-			countdown = enemy.headStart / 1000 - parseInt(timeDelta / 1000);
+		if (timeDelta % 1000 <= 1000) {
+			countdown = enemy.headStart - parseInt(timeDelta / 1000);
 			if (countdown <= 0) {
 				countdown = null;
 			}
@@ -240,10 +258,5 @@ function gridCoords(vec) {
 }
 
 var up = 38, down = 40, left = 37, right = 39;
-
-lightSource = new Vector(
-	player.x + player.width / 2,
-	player.y + player.height / 2
-);
 
 updatePolygons();
