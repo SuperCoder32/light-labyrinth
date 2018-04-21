@@ -13,6 +13,10 @@ class Character {
 }
 
 
+function updatePolygonsWrapper() {
+	updatePolygons(Math.max(lightRadius, (new Segment(player, enemy)).distance()));
+}
+
 
 //Game initialization
 //	Player logic
@@ -46,83 +50,63 @@ function playerMovementFunc() {
 			lightRadius--;
 		}
 
-		updatePolygons(lightRadius);
+		updatePolygonsWrapper();
 	}
 }
 
 //	Enemy logic
 var enemy;
-function createEnemy(headStart) {
+function createEnemy() {
+
 	enemy.move = function () {
-		var currNode = this.pathToPlayer[this.nodeIndex];
-		currNode = new Vector(currNode.x * cellWidth, currNode.y * cellHeight);
-		this.moveTowards();
-	
-		var arrived = false;
-		if (this.direction == "right") {
-			arrived = this.x >= currNode.x;
-		} else if (this.direction == "left") {
-			arrived = this.x <= currNode.x;
-		} else if (this.direction == "down") {
-			arrived = this.y >= currNode.y;
-		} else if (this.direction == "up") {
-			arrived = this.y <= currNode.y;
-		}
-	
-		if (arrived) {
+		var newPos = lerp(
+			cellCenterCoords(this.fromNode),
+			cellCenterCoords(this.toNode),
+			this.progress
+		);
+
+		enemy.x = newPos.x - cellWidth / 2;
+		enemy.y = newPos.y - cellHeight / 2;
+
+		this.progress += enemy.speed;
+
+		if (this.progress >= 1) {
+			this.progress = 0;
 			this.nodeIndex++;
+
+			this.fromNode = this.toNode;
 			if (this.nodeIndex < this.pathToPlayer.length) {
-				this.direction = this.getDirection();
+				this.toNode = this.pathToPlayer[this.nodeIndex];
+			} else {
+				this.initialize();
 			}
 		}
-		if (this.nodeIndex == this.pathToPlayer.length) {
-			this.initialize();
-		}
 	}
-	
-	enemy.getDirection = function () {
-		var currNode = this.pathToPlayer[this.nodeIndex];
-		currNode = new Vector(currNode.x * cellWidth, currNode.y * cellHeight);
-		if (this.x < currNode.x) {
-			return "right";
-		} else if (this.x > currNode.x) {
-			return "left";
-		} else if (this.y < currNode.y) {
-			return "down";
-		} else if (this.y > currNode.y) {
-			return "up";
-		}
-	}
-	
-	enemy.moveTowards = function (coords) {
-		if (this.direction == "right") {
-			this.x += this.speed;
-		} else if (this.direction == "left") {
-			this.x -= this.speed;
-		} else if (this.direction == "down") {
-			this.y += this.speed;
-		}  else if (this.direction == "up") {
-			this.y -= this.speed;
-		}
-	}
-	
+
 	enemy.initialize = function () {
-		var myGridPos = gridCoords(this);
-		var playerGridPos = gridCoords(player); 
+		var myCenterPos = new Vector(this.x + cellWidth / 2, this.y + cellHeight / 2);
+		var myGridPos = gridCoords(myCenterPos);
+		var playerGridPos = gridCoords(player);
+
 		this.pathToPlayer = getGraphPath(
 			graph,
 			new Vector(myGridPos.x, myGridPos.y),
 			new Vector(playerGridPos.x, playerGridPos.y)
 		);
+
 		this.nodeIndex = 0;
-		if (this.pathToPlayer) {
-			this.direction = this.getDirection();
-		}
+		
+		//fromNode has the right value after last move
+		this.toNode = this.pathToPlayer[0];
+
+		this.progress = 0;
 	}
-	
-	enemy.speed = 2;
+
+	enemy.fromNode = new Vector(0, 0);
+	enemy.speed = enemySpeed;
 	enemy.headStart = headStart;
 }
+
 
 //	Basics
 var cellWidth, cellHeight, labyrinth, verEdges, horEdges, graph;
@@ -190,6 +174,7 @@ function initGame() {
 	points = 0;
 
 	player = new Character(cellWidth / 2, cellHeight / 2, cellWidth / 4, cellHeight / 4, "#aaaaaa", playerMovementFunc);
+	player.speed = playerSpeed * cellWidth;
 	enemy = new Character(0, 0, cellWidth, cellHeight, "#990000");
 	createEnemy(headStart);
 
@@ -199,7 +184,7 @@ function initGame() {
 	);
 
 	lightRadius = canvas.width * lightSpan / n;
-	updatePolygons(lightRadius);
+	updatePolygonsWrapper();
 }
 
 
@@ -257,6 +242,8 @@ function gridCoords(vec) {
 	return new Vector(newX, newY);
 }
 
-var up = 38, down = 40, left = 37, right = 39;
-
-updatePolygons();
+function cellCenterCoords(cell) {
+	var newX = cell.x * cellWidth + cellWidth / 2;
+	var newY = cell.y * cellHeight + cellHeight / 2;
+	return new Vector(newX, newY);
+}
